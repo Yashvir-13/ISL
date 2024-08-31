@@ -6,12 +6,6 @@ I love you
 eat
 sing
 pray
-
-
-
-
-
-
 yes
 no
 hello
@@ -23,3 +17,16 @@ sad
 sleep
 India
 
+
+home
+finish
+name
+what
+you
+happy
+angry
+school
+work
+deaf
+car
+cinema
