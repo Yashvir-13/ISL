@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gesture Recognition Test</title>
+</head>
+<body>
+    <h1>Real-Time Gesture Recognition</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <button id="capture">Capture & Predict</button>
+    <p id="prediction"></p>
+    <img id="processed_image" style="display: none;">
+
+    <script>
+        const video = document.getElementById('video');
+        const captureButton = document.getElementById('capture');
+        const predictionElement = document.getElementById('prediction');
+        const processedImageElement = document.getElementById('processed_image');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error('Error accessing the camera: ', err);
+            });
+
+        captureButton.addEventListener('click', () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append('image', blob, 'frame.jpg');
+
+                fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.prediction) {
+                        predictionElement.textContent = `Prediction: ${data.prediction}`;
+                        processedImageElement.src = `data:image/jpeg;base64,${data.image}`;
+                        processedImageElement.style.display = 'block';
+                    } else {
+                        predictionElement.textContent = `Error: ${data.error}`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }, 'image/jpeg');
+        });
+    </script>
+</body>
+</html>
