@@ -49,3 +49,4 @@ with open('label_encoder.pkl', 'wb') as f:
     joblib.dump(label_encoder, f)
 
 print(data.shape)
+print(np.unique(label_encoder.inverse_transform(y_encoded)))

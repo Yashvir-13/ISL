@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import joblib
 import mediapipe as mp
+from translations import hindi_dict, bengali_dict, malayalam_dict, marathi_dict, punjabi_dict, tamil_dict, telugu_dict, kannada_dict, gujarati_dict, urdu_dict
 
 # Load model and label encoder
 model_dict = joblib.load('model.pkl')
@@ -17,6 +18,9 @@ hands = mp_hands.Hands(static_image_mode=False, min_detection_confidence=0.7)  #
 
 # Camera setup
 cap = cv2.VideoCapture(0)
+
+# Choose the dictionary to use
+selected_dict = hindi_dict  # Change this to your preferred dictionary
 
 while True:
     ret, frame = cap.read()
@@ -60,8 +64,17 @@ while True:
             hand_idx += 1
 
         prediction = model.predict([np.asarray(data_aux)])
-        predicted_character = label_encoder.inverse_transform(prediction)
+        predicted_label = label_encoder.inverse_transform(prediction)[0]
+
+        print(f"Predicted Label: {predicted_label}")  # Debugging line
+
+        try:
+            predicted_character = selected_dict[predicted_label]
+        except KeyError:
+            predicted_character = "Unknown"
         
+        print(f"Predicted Character: {predicted_character}")  # Debugging line
+
         for hand_landmarks in results.multi_hand_landmarks:
             mp_drawing.draw_landmarks(
                 frame, 
@@ -72,7 +85,7 @@ while True:
             )
         
         x1, y1 = int(min_x * W) - 10, int(min_y * H) - 10
-        cv2.putText(frame, predicted_character[0], (x1, y1 - 10), 
+        cv2.putText(frame, predicted_character, (x1, y1 - 10), 
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
     else:
         print("No hand landmarks detected in this frame.")

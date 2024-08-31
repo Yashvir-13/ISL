@@ -16,8 +16,6 @@ doctor
 sad
 sleep
 India
-
-
 home
 finish
 name

@@ -3,6 +3,8 @@ import numpy as np
 import joblib
 import mediapipe as mp
 from flask import Flask, render_template, request, jsonify
+from translations import hindi_dict, bengali_dict, malayalam_dict, marathi_dict, punjabi_dict, tamil_dict, telugu_dict, kannada_dict, gujarati_dict, urdu_dict
+
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -12,6 +14,7 @@ model_dict = joblib.load('model.pkl')
 model = model_dict['model']
 with open('label_encoder.pkl', 'rb') as f:
     label_encoder = joblib.load(f)
+selected_dict = hindi_dict
 
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
@@ -50,12 +53,17 @@ def process_frame(frame):
                 normalized.append((x - min_x) / (max_x - min_x))
                 normalized.append((y - min_y) / (max_y - min_y))
 
-            # Fill in the features for the current hand (42 features)
             data_aux[hand_idx * 42:(hand_idx + 1) * 42] = normalized
             hand_idx += 1
 
         prediction = model.predict([np.asarray(data_aux)])
-        predicted_character = label_encoder.inverse_transform(prediction)
+        predicted_label = label_encoder.inverse_transform(prediction)[0]
+        print(f"Predicted Label: {predicted_label}")
+        try:
+            predicted_character = selected_dict[predicted_label]
+        except KeyError:
+            predicted_character = "Unknown"
+        print(f"Predicted Character: {predicted_character}")  # Debugging line
 
         # Draw bounding boxes and predictions on the frame
         for hand_landmarks in results.multi_hand_landmarks:
@@ -67,7 +75,7 @@ def process_frame(frame):
                 mp_drawing_styles.get_default_hand_connections_style()
             )
 
-        return predicted_character[0], frame
+        return predicted_character, frame
     else:
         return None, frame
 @app.route('/')
@@ -93,12 +101,13 @@ def predict():
         frame_data = buffer.tobytes()
 
         return jsonify({
-            'prediction': prediction,
+            'prediction': prediction,  # Return the full prediction text
             'image': frame_data.hex()
         })
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
