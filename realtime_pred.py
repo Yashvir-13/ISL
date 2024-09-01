@@ -73,7 +73,7 @@ while True:
         except KeyError:
             predicted_character = "Unknown"
         
-        print(f"Predicted Character: {predicted_character}")  # Debugging line
+        print(f"Predicted Character: {predicted_label}")  # Debugging line
 
         for hand_landmarks in results.multi_hand_landmarks:
             mp_drawing.draw_landmarks(
@@ -85,7 +85,7 @@ while True:
             )
         
         x1, y1 = int(min_x * W) - 10, int(min_y * H) - 10
-        cv2.putText(frame, predicted_character, (x1, y1 - 10), 
+        cv2.putText(frame, predicted_label, (x1, y1 - 10), 
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
     else:
         print("No hand landmarks detected in this frame.")

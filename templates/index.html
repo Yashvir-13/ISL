@@ -9,14 +9,31 @@
     <h1>Real-Time Gesture Recognition</h1>
     <video id="video" width="640" height="480" autoplay></video>
     <button id="capture">Capture & Predict</button>
+    <label for="language">Choose a language:</label>
+    <select id="language">
+        <option value="en">English</option>
+        <option value="hi">Hindi</option>
+        <option value="bn">Bengali</option>
+        <option value="pa">Punjabi</option>
+        <option value="mr">Marathi</option>
+        <option value="ml">Malayalam</option>
+        <option value="ta">Tamil</option>
+        <option value="te">Telugu</option>
+        <option value="gu">Gujarati</option>
+        <option value="ur">Urdu</option>
+        <!-- Add more languages as needed -->
+    </select>
     <p id="prediction"></p>
     <img id="processed_image" style="display: none;">
+    <audio id="audio" controls style="display: none;"></audio>
 
     <script>
         const video = document.getElementById('video');
         const captureButton = document.getElementById('capture');
         const predictionElement = document.getElementById('prediction');
         const processedImageElement = document.getElementById('processed_image');
+        const languageSelect = document.getElementById('language');
+        const audioElement = document.getElementById('audio');
 
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
@@ -35,6 +52,7 @@
             canvas.toBlob(blob => {
                 const formData = new FormData();
                 formData.append('image', blob, 'frame.jpg');
+                formData.append('language', languageSelect.value);
 
                 fetch('/predict', {
                     method: 'POST',
@@ -46,12 +64,21 @@
                         predictionElement.textContent = `Prediction: ${data.prediction}`;
                         processedImageElement.src = `data:image/jpeg;base64,${data.image}`;
                         processedImageElement.style.display = 'block';
+                        
+                        if (data.audio_file) {
+                            audioElement.src = data.audio_file;
+                            audioElement.style.display = 'block';
+                            audioElement.play().catch(error => {
+                                console.error('Error playing audio:', error);
+                            });
+                        }
                     } else {
                         predictionElement.textContent = `Error: ${data.error}`;
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
+                    predictionElement.textContent = `Error: ${error.message}`;
                 });
             }, 'image/jpeg');
         });
