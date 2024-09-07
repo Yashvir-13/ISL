@@ -5,6 +5,8 @@ from sklearn.metrics import accuracy_score
 import numpy as np
 import joblib
 from sklearn.preprocessing import LabelEncoder
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
 
 # Load the data
 data_dict = pickle.load(open('data.pickle', 'rb'))
@@ -33,7 +35,7 @@ y_encoded = label_encoder.fit_transform(labels)
 x_train, x_test, y_train, y_test = train_test_split(data, y_encoded, test_size=0.2, shuffle=True, stratify=y_encoded, random_state=42)
 
 # Train the model
-model = RandomForestClassifier(random_state=42)
+model = RandomForestClassifier(n_jobs=-1,random_state=42)
 model.fit(x_train, y_train)
 
 # Make predictions and evaluate accuracy

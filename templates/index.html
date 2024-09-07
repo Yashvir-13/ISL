@@ -4,25 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gesture Recognition Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            background-color: antiquewhite;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        h1 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Video */
+        video {
+            border: 5px solid #333;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        /* Button Styling */
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #333;
+            background-color: bisque;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #e0c4a6;
+        }
+
+        /* Label and Select Styling */
+        label {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #333;
+            margin-right: 10px;
+        }
+
+        select {
+            padding: 5px 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        /* Prediction Output */
+        p#prediction {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        /* Processed Image */
+        /* img#processed_image {
+            margin-top: 20px;
+            border-radius: 8px;
+            max-width: 100%;
+            height: auto;
+        } */
+
+        /* Audio Element */
+        audio#audio {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 640px;
+        }
+    </style>
 </head>
 <body>
     <h1>Real-Time Gesture Recognition</h1>
     <video id="video" width="640" height="480" autoplay></video>
     <button id="capture">Capture & Predict</button>
-    <label for="language">Choose a language:</label>
-    <select id="language">
-        <option value="en">English</option>
-        <option value="hi">Hindi</option>
-        <option value="bn">Bengali</option>
-        <option value="pa">Punjabi</option>
-        <option value="mr">Marathi</option>
-        <option value="ml">Malayalam</option>
-        <option value="ta">Tamil</option>
-        <option value="te">Telugu</option>
-        <option value="gu">Gujarati</option>
-        <option value="ur">Urdu</option>
-        <!-- Add more languages as needed -->
-    </select>
+    <div>
+        <label for="language">Choose a language:</label>
+        <select id="language">
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="bn">Bengali</option>
+            <option value="pa">Punjabi</option>
+            <option value="mr">Marathi</option>
+            <option value="ml">Malayalam</option>
+            <option value="ta">Tamil</option>
+            <option value="te">Telugu</option>
+            <option value="gu">Gujarati</option>
+            <option value="ur">Urdu</option>
+            <!-- Add more languages as needed -->
+        </select>
+    </div>
     <p id="prediction"></p>
     <img id="processed_image" style="display: none;">
     <audio id="audio" controls style="display: none;"></audio>
@@ -35,6 +128,7 @@
         const languageSelect = document.getElementById('language');
         const audioElement = document.getElementById('audio');
 
+        // Access the camera
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
                 video.srcObject = stream;
@@ -43,12 +137,14 @@
                 console.error('Error accessing the camera: ', err);
             });
 
+        // Capture the frame and send for prediction
         captureButton.addEventListener('click', () => {
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
             canvas.toBlob(blob => {
                 const formData = new FormData();
                 formData.append('image', blob, 'frame.jpg');
@@ -64,7 +160,7 @@
                         predictionElement.textContent = `Prediction: ${data.prediction}`;
                         processedImageElement.src = `data:image/jpeg;base64,${data.image}`;
                         processedImageElement.style.display = 'block';
-                        
+
                         if (data.audio_file) {
                             audioElement.src = data.audio_file;
                             audioElement.style.display = 'block';
